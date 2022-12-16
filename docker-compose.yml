@@ -1,0 +1,61 @@
+version: '3.9'
+
+services:
+  nginx:
+    container_name: nginx
+    user: root
+    # image: nginx:alpine
+    build: ./build/nginx/
+    volumes:
+    - ./build/nginx/nginx.conf:/etc/nginx/sites-enabled/default
+    #   - ./build/conf.d:/etc/nginx/conf.d
+    - wp_data:/var/www/html
+    ports:
+      - "80:80"
+    depends_on:
+      - php
+    networks:
+      - default
+    #user: "www-data:www-data"
+  php:
+    container_name: php
+    user: root
+    #container_name: php
+    #image: php:8.1-fpm
+    build: ./build/php
+    volumes:
+    - wp_data:/var/www/html
+    - ./build/php/www.conf:/etc/php/8.1/fpm/pool.d/www.conf
+    ports:
+      - "9000:9000"
+    depends_on:
+      - db
+    networks:
+      - default
+    # command: wp core install --url=http://localhost  --title=hello_world --admin_user=root --admin_password=root --admin_email=root@42.com --allow-root
+  db:
+    container_name: db
+    #image: mariadb:latest
+    build: ./build/mariadb
+    environment:
+      MYSQL_DATABASE: wp
+      MYSQL_USER: wp
+      MYSQL_PASSWORD: secret
+      MYSQL_ROOT_PASSWORD: secret 
+    volumes:
+      - db_data:/var/lib/mysql
+    expose:
+      - 3306
+    ports:
+      - "3306:3306"
+    networks:
+      - default
+volumes:
+  db_data:
+  wp_data:
+networks:
+  default:
+
+
+    # build: ./build/php
+  
