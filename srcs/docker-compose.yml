@@ -1,0 +1,58 @@
+version: '3.9'
+
+services:
+  nginx:
+    container_name: nginx
+    user: root
+    build: ./requirements/nginx/
+    volumes:
+      - wp_data:/var/www/html
+    ports:
+      - "443:443"
+      - "80:80"
+    depends_on:
+      - wordpress
+    networks:
+      - default
+    expose:
+      - 443
+      - 80
+  wordpress:
+    container_name: wordpress
+    user: root
+    build: ./requirements/wordpress/
+    volumes:
+    - wp_data:/var/www/html
+    ports:
+      - "9000:9000"
+    depends_on:
+      - mariadb
+    networks:
+      - default
+    expose:
+      - 9000
+    environment:
+      WORDPRESS_DB_HOST: mariadb:3306
+      WORDPRESS_DB_USER: wp
+      WORDPRESS_DB_PASSWORD: secret
+  mariadb:
+    container_name: mariadb
+    build: ./requirements/mariadb/
+    environment:
+      MYSQL_DATABASE: wp
+      MYSQL_USER: wp
+      MYSQL_PASSWORD: secret
+      MYSQL_ROOT_PASSWORD: secret 
+    volumes:
+      - db_data:/var/lib/mysql
+    expose:
+      - 3306
+    ports:
+      - "3306:3306"
+    networks:
+      - default
+volumes:
+  db_data:
+  wp_data:
+networks:
+  default:
