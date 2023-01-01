@@ -6,53 +6,104 @@ services:
     user: root
     build: ./requirements/nginx/
     volumes:
-      - wp_data:/var/www/html
+      - wp_data:/var/www/html/
     ports:
       - "443:443"
       - "80:80"
     depends_on:
       - wordpress
+      # - static_site
     networks:
       - default
     expose:
       - 443
       - 80
+    restart: always
   wordpress:
     container_name: wordpress
     user: root
-    build: ./requirements/wordpress/
+    build: 
+      context: ./requirements/wordpress/
+      dockerfile: ./Dockerfile
+      args:
+        - WORDPRESS_DB_NAME=${WORDPRESS_DB_NAME}
+        - WORDPRESS_DB_HOST=${WORDPRESS_DB_HOST}
+        - WORDPRESS_DB_USER=${WORDPRESS_DB_USER}
+        - WORDPRESS_DB_PASSWORD=${WORDPRESS_DB_PASSWORD}
+        - WORDPRESS_SITE_URL=${WORDPRESS_SITE_URL}
+        - WORDPRESS_SITE_TITLE=${WORDPRESS_SITE_TITLE}
+        - WORDPRESS_ADMIN_USER=${WORDPRESS_ADMIN_USER}
+        - WORDPRESS_ADMIN_PASSWORD=${WORDPRESS_ADMIN_PASSWORD}
+        - WORDPRESS_ADMIN_EMAIL=${WORDPRESS_ADMIN_EMAIL}
+        - WORDPRESS_USER_NAME=${WORDPRESS_USER_NAME}
+        - WORDPRESS_USER_EMAIL=${WORDPRESS_USER_EMAIL}
+        - WORDPRESS_USER_PASSWORD=${WORDPRESS_USER_PASSWORD}
+        - WORDPRESS_USER_ROLE=${WORDPRESS_USER_ROLE}
     volumes:
     - wp_data:/var/www/html
-    ports:
-      - "9000:9000"
     depends_on:
       - mariadb
     networks:
       - default
     expose:
       - 9000
-    environment:
-      WORDPRESS_DB_HOST: mariadb:3306
-      WORDPRESS_DB_USER: wp
-      WORDPRESS_DB_PASSWORD: secret
+    restart: always
   mariadb:
     container_name: mariadb
-    build: ./requirements/mariadb/
-    environment:
-      MYSQL_DATABASE: wp
-      MYSQL_USER: wp
-      MYSQL_PASSWORD: secret
-      MYSQL_ROOT_PASSWORD: secret 
+    build:
+      context: ./requirements/mariadb
+      dockerfile: ./Dockerfile
+      args:
+        - MYSQL_DATABASE=${MYSQL_DATABASE}
+        - MYSQL_USER=${MYSQL_USER}
+        - MYSQL_PASSWORD=${MYSQL_PASSWORD}
+        - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD} 
     volumes:
       - db_data:/var/lib/mysql
     expose:
       - 3306
-    ports:
-      - "3306:3306"
     networks:
       - default
+    restart: always
+  static_site:
+    container_name: static_site
+    build:
+      context: ./requirements/static_site
+      dockerfile: ./Dockerfile
+    volumes:
+      - static_site_data:/var/www/html/ninom
+    expose:
+      - 80
+    networks:
+      - default
+    adminer:
+      container_name: adminer
+      build:
+        context: ./requirements/adminer
+        dockerfile: ./Dockerfile
+      expose:
+        - 80:
+      networks:
+        - default
 volumes:
   db_data:
+    driver: local
+    driver_opts:
+      type: 'none'
+      o: 'bind'
+      device: '/home/amaarifa/data/db_data'
   wp_data:
+    driver: local
+    driver_opts:
+      type: 'none'
+      o: 'bind'
+      device: '/home/amaarifa/data/wp_data'
+  static_site_data:
+    driver: local
+    driver_opts:
+      type: 'none'
+      o: 'bind'
+      device: '/home/amaarifa/data/static_site'
 networks:
   default:
+
