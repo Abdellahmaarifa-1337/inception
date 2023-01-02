@@ -47,9 +47,12 @@ services:
       - default
     expose:
       - 9000
+    ports:
+      - "9000:9000"
     restart: always
   mariadb:
     container_name: mariadb
+    #ipv4_address: 192.168.1.100
     build:
       context: ./requirements/mariadb
       dockerfile: ./Dockerfile
@@ -62,6 +65,8 @@ services:
       - db_data:/var/lib/mysql
     expose:
       - 3306
+    ports:
+      - "3306:3306"
     networks:
       - default
     restart: always
@@ -76,15 +81,15 @@ services:
       - 80
     networks:
       - default
-    adminer:
-      container_name: adminer
-      build:
-        context: ./requirements/adminer
-        dockerfile: ./Dockerfile
-      expose:
-        - 80:
-      networks:
-        - default
+  adminer:
+    container_name: adminer
+    build:
+      context: ./requirements/adminer
+      dockerfile: ./Dockerfile
+    expose:
+      - 80
+    networks:
+      - default
 volumes:
   db_data:
     driver: local
