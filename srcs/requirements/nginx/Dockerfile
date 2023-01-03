@@ -8,8 +8,8 @@ RUN chown -R root:root  /var/www/html
 
 RUN chmod -R 777 /var/www/html
 
-COPY ./conf/default /etc/nginx/sites-enabled/default
-
+#COPY ./conf/default /etc/nginx/sites-enabled/default
+COPY ./conf/amaarifa.config /etc/nginx/sites-enabled/amaarifa.config
 COPY ./conf/ninom.config /etc/nginx/sites-enabled/ninom.config
 COPY ./tools/ssl.sh /ssl.sh
 COPY ./conf/ssl.conf .

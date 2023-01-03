@@ -9,7 +9,6 @@ services:
       - wp_data:/var/www/html/
     ports:
       - "443:443"
-      - "80:80"
     depends_on:
       - wordpress
       # - static_site
@@ -17,7 +16,6 @@ services:
       - default
     expose:
       - 443
-      - 80
     restart: always
   wordpress:
     container_name: wordpress
@@ -52,7 +50,6 @@ services:
     restart: always
   mariadb:
     container_name: mariadb
-    #ipv4_address: 192.168.1.100
     build:
       context: ./requirements/mariadb
       dockerfile: ./Dockerfile
@@ -86,10 +83,15 @@ services:
     build:
       context: ./requirements/adminer
       dockerfile: ./Dockerfile
-    expose:
-      - 80
     networks:
       - default
+    # volumes:
+    #   - wp_data:/var/www/html/
+    
+  # redis:
+  #   image: redis
+  #   ports:
+  #     - "6379:6379"
 volumes:
   db_data:
     driver: local
