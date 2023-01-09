@@ -8,9 +8,7 @@ RUN wget "http://www.adminer.org/latest.php" -O /var/www/html/index.php
 
 RUN chown -R www-data:www-data /var/www/html/index.php
 
-RUN  chmod 755 /var/www/html/index.php
+RUN  chmod 777 /var/www/html/index.php
 RUN rm /var/www/html/index.html
-#COPY ./conf/httpd.conf /opt/bitnami/apache2/conf/httpd.conf
-#EXPOSE 60
 
 CMD ["/usr/sbin/apache2ctl", "-D", "FOREGROUND"]

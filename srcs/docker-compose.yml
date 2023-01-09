@@ -3,15 +3,14 @@ version: '3.9'
 services:
   nginx:
     container_name: nginx
-    user: root
     build: ./requirements/nginx/
+    image: nginx
     volumes:
       - wp_data:/var/www/html/
     ports:
       - "443:443"
     depends_on:
       - wordpress
-      # - static_site
     networks:
       - default
     expose:
@@ -19,7 +18,6 @@ services:
     restart: always
   wordpress:
     container_name: wordpress
-    user: root
     build: 
       context: ./requirements/wordpress/
       dockerfile: ./Dockerfile
@@ -37,6 +35,7 @@ services:
         - WORDPRESS_USER_EMAIL=${WORDPRESS_USER_EMAIL}
         - WORDPRESS_USER_PASSWORD=${WORDPRESS_USER_PASSWORD}
         - WORDPRESS_USER_ROLE=${WORDPRESS_USER_ROLE}
+    image: wordpress
     volumes:
     - wp_data:/var/www/html
     depends_on:
@@ -58,6 +57,7 @@ services:
         - MYSQL_USER=${MYSQL_USER}
         - MYSQL_PASSWORD=${MYSQL_PASSWORD}
         - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD} 
+    image: mariadb
     volumes:
       - db_data:/var/lib/mysql
     expose:
@@ -72,26 +72,69 @@ services:
     build:
       context: ./requirements/static_site
       dockerfile: ./Dockerfile
+    image: static_site
     volumes:
       - static_site_data:/var/www/html/ninom
     expose:
       - 80
     networks:
       - default
+    restart: always
   adminer:
     container_name: adminer
     build:
       context: ./requirements/adminer
       dockerfile: ./Dockerfile
+    image: adminer
     networks:
       - default
-    # volumes:
-    #   - wp_data:/var/www/html/
-    
-  # redis:
-  #   image: redis
-  #   ports:
-  #     - "6379:6379"
+    restart: always
+  ftp:
+    container_name: ftp
+    build:
+      context: ./requirements/ftp
+      dockerfile: ./Dockerfile
+      args:
+        - FTP_USER=${FTP_USER}
+        - FTP_PASS=${FTP_PASS}
+    image: ftp
+    networks:
+      - default
+    ports:
+      - "21:21"
+    volumes:
+      - wp_data:/var/www/html
+    restart: always
+  redis:
+    container_name: redis
+    build:
+      context: ./requirements/redis
+      dockerfile: ./Dockerfile
+    image: redis
+    ports:
+      - "6379:6379"
+    networks:
+      - default
+    expose:
+      - 6379
+    restart: always
+  jenkins:
+    container_name: jenkins
+    build:
+      context: ./requirements/jenkins
+      dockerfile: ./Dockerfile
+    image: jenkins
+    ports:
+      - 8080:8080
+      - 50000:50000
+    networks:
+      - default
+    expose:
+      - 8080
+    volumes:
+      - jenkins_home:/root/.jenkins/
+      - wp_data:/var/www/html/
+    restart: always
 volumes:
   db_data:
     driver: local
@@ -111,6 +154,7 @@ volumes:
       type: 'none'
       o: 'bind'
       device: '/home/amaarifa/data/static_site'
+  jenkins_home:
 networks:
   default:
 
